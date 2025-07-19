@@ -171,7 +171,6 @@ const ManageContacts = () => {
           </tbody>
         </table>
         {checkedContacts.size > 0 && (
-
           <button
             className="bg-green-600 text-white px-4 py-2 rounded mt-4"
             onClick={() => {

@@ -29,7 +29,7 @@ const RegisterPage = () => {
     const submitEvent = async (data) => {
         try {
             const response = await axiosInstance.post("/users/register", data);
-            console.log("Response:", response.data);
+            console.log("Response:", response);
 
             toast.success("Registration Successful!");
 
