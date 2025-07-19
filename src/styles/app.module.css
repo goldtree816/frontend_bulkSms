@@ -1,0 +1,9 @@
+.goldtree-app {
+  display: flex;
+  justify-content: center;
+  font-size: xx-large;
+  color: rgb(138, 108, 32);
+  align-items: center;
+  height: 100vh;
+  font-weight: 500;
+}
