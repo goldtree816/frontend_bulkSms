@@ -17,6 +17,7 @@ import EditGroup from '../layout/editGroupById';
 import SendWhatsAppMsg from '../components/twilio/sendWhatsApp';
 import SendEmail from '../components/twilio/sendEmail';
 import Service from '../layout/services';
+import BuyService from '../layout/buyservice';
 
 const RoutingConfig = () => {
 
@@ -36,6 +37,7 @@ const RoutingConfig = () => {
           <Route path="whatsApp" element={<SendWhatsAppMsg/>}/>
           <Route path="email" element={<SendEmail/>}/>
           <Route path="service" element={<Service/>}/>
+          <Route path="buyService" element={<BuyService/>}/>
           <Route
             path="calendar"
             element={
