@@ -6,10 +6,11 @@ const SendWhatsAppMsg = () => {
     const [numberInput, setNumberInput] = useState("");
     const [numbers, setNumbers] = useState([]);
     const [message, setMessage] = useState("");
-
     const [groups, setGroups] = useState([]);
     const [checkedGroups, setCheckedGroups] = useState(new Set());
     const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
+    const [fromDate, setFromDate] = useState();
+    const [toDate, setToDate] = useState();
 
     useEffect(() => {
         const fetchGroups = async () => {
@@ -173,6 +174,21 @@ const SendWhatsAppMsg = () => {
                             </div>
                         )}
                     </div>
+                </div>
+                <div className="flex flex-wrap gap-2 ml-15 w-auto">
+                    <div className="px-2 py-1 space-x-4">
+                        <label htmlFor="" className="font-medium">From</label>
+                        <input type="date"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)} />
+                    </div>
+                    <div className="px-2 py-1 space-x-4">
+                        <label htmlFor="" className="font-medium">To</label>
+                        <input type="date"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)} />
+                    </div>
+
                 </div>
 
 

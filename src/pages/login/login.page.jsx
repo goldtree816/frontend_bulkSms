@@ -6,12 +6,17 @@ import * as Yup from "yup";
 import axiosInstance from "../../config/axios.config";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import AuthContext from "../../context/auth.context";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const { setLoggedInUser } = useContext(AuthContext);
+    const [showPassword, setShowPassword] = useState(false);
+    const togglePassword = () => {
+        setShowPassword(!showPassword);
+    }
 
     const loginDto = Yup.object().shape({
         email: Yup.string().email("Invalid email").required("Email is compulsory"),
@@ -79,21 +84,32 @@ const LoginPage = () => {
                             />
                             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
 
-                            <label className="mt-4">Password</label>
-                            <Controller
-                                control={control}
-                                name="password"
-                                render={({ field }) => (
-                                    <input
-                                        {...field}
-                                        type="password"
-                                        className="border-b-2 border-gray-300 focus:outline-none h-10 flex items-center px-1"
-                                        placeholder="Type your Password"
+                            <div className="flex flex-col">
+                                <label className="mt-4 mb-1">Password</label>
+                                <div className="flex items-center border-b-2 border-gray-300 w-full">
+                                    <Controller
+                                        control={control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <input
+                                                {...field}
+                                                type={showPassword ? "text" : "password"}
+                                                className="flex-1 focus:outline-none h-10 px-1"
+                                                placeholder="Type your Password"
+                                            />
+                                        )}
                                     />
+                                    <span
+                                        onClick={togglePassword}
+                                        className="cursor-pointer px-2 text-gray-600"
+                                    >
+                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                    </span>
+                                </div>
+                                {errors.password && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
                                 )}
-                            />
-                            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-
+                            </div>
                             <a className="text-gray-500 self-end hover:text-red-500 cursor-pointer">Forget Password?</a>
                         </div>
 

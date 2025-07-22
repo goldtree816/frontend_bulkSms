@@ -151,7 +151,11 @@ const UserLayout = () => {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink to="/user/service">
+                            <NavLink to="/user/service" className="flex itmes-center p-2 text-gray-900 rounded-lg hover:bg-gray-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                </svg>
+
                                 <span className="ms-3 text-xs">Services</span>
 
                             </NavLink>

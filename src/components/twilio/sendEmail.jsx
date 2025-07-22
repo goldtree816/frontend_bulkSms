@@ -9,6 +9,8 @@ const SendEmail = () => {
   const [groups, setGroups] = useState([]);
   const [checkedGroups, setCheckedGroups] = useState(new Set());
   const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
+  const [fromDate, setFromDate] = useState();
+  const [toDate, setToDate] = useState();
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -133,7 +135,7 @@ const SendEmail = () => {
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 p-6 bg-gray-100 min-h-screen">
-      <div className="w-full md:w-1/2 bg-white shadow-lg rounded-2xl p-6 flex flex-col">
+      <div className="w-full md:w-[50%] bg-white shadow-lg rounded-2xl p-6 flex flex-col">
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email Addresses
@@ -171,20 +173,34 @@ const SendEmail = () => {
             readOnly
           />
         </div>
+        <div className="flex flex-wrap gap-2 ml-15 w-auto">
+          <div className="px-2 py-1 space-x-4">
+            <label htmlFor="" className="font-medium">From</label>
+            <input type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)} />
+          </div>
+          <div className="px-2 py-1 space-x-4">
+            <label htmlFor="" className="font-medium">To</label>
+            <input type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)} />
+          </div>
+
+        </div>
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Message
           </label>
           <textarea
-            rows={5}
+            rows={15}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your message here..."
           />
         </div>
-
         <button
           onClick={handleSubmit}
           className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"
@@ -192,7 +208,7 @@ const SendEmail = () => {
           Send Email
         </button>
       </div>
-      <div className="w-full md:w-1/2 bg-white border rounded shadow-md flex flex-col">
+      <div className="w-full md:w-[30%] bg-white border rounded shadow-md flex flex-col">
         <div className="bg-gray-600 text-center py-2 rounded-t">
           <h1 className="text-white text-lg font-semibold">Email Groups</h1>
         </div>

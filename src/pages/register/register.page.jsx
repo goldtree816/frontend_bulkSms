@@ -5,9 +5,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import axiosInstance from "../../config/axios.config";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useState } from "react";
+import { FaEyeSlash, FaEye } from "react-icons/fa"
 
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPaword, setShowConfirmPassword] = useState(false);
 
     const rules = Yup.object({
         f_name: Yup.string().min(2).max(20).required("First Name is required"),
@@ -21,7 +25,12 @@ const RegisterPage = () => {
             .oneOf([Yup.ref("password")], "Confirm password and password do not match")
             .required("Confirm Password is required"),
     });
-
+    const togglePassword=()=>{
+        setShowPassword(!showPassword);
+    }
+    const toggleConfirmPassword=()=>{
+        setShowConfirmPassword(!showConfirmPaword);
+    }
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(rules)
     });
@@ -35,7 +44,7 @@ const RegisterPage = () => {
 
             setTimeout(() => {
                 navigate("/login");
-            }, 1500); 
+            }, 1500);
 
         } catch (exception) {
             console.log("Register Exception:", exception.response?.data || exception.message);
@@ -66,13 +75,35 @@ const RegisterPage = () => {
                                 <input {...register("email")} type="text" className="border-b-2 focus:outline-none" placeholder="Enter your @email" />
                                 <p className="text-red-500">{errors?.email?.message}</p>
 
-                                <label>Password</label>
-                                <input {...register("password")} type="password" className="border-b-2 focus:outline-none" placeholder="Enter your password" />
-                                <p className="text-red-500">{errors?.password?.message}</p>
+                                <div className="flex flex-col">
+                                    <label className="mb-1">Password</label>
+                                    <div className="flex items-center border-b-2">
+                                        <input
+                                            {...register("password")}
+                                            type={showPassword ? "text" : "password"}
+                                            className="flex-1 focus:outline-none"
+                                            placeholder="Enter your password"
+                                        />
+                                        <span onClick={togglePassword} className="cursor-pointer text-gray-600 px-2">
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </span>
+                                    </div>
+                                    <p className="text-red-500 text-sm mt-1">{errors?.password?.message}</p>
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="confirmPassword">Confirm Password</label>
+                                    <div className="flex items-center border-b-2">
+                                        <input type={showConfirmPaword? "text":"password"} 
+                                        className="flex-1 focus:outline-none"
+                                        placeholder="Enter you password again"/>
 
-                                <label>Confirm Password</label>
-                                <input {...register("confirmPassword")} type="password" className="border-b-2 focus:outline-none" placeholder="Re-enter your password" />
-                                <p className="text-red-500">{errors?.confirmPassword?.message}</p>
+                                        <span onClick={toggleConfirmPassword}>
+                                            {showConfirmPaword ? <FaEyeSlash/>:<FaEye/>}
+                                        </span>
+
+                                    </div>
+
+                                </div>
 
                                 <button type="button" className="text-blue-500" onClick={() => navigate("/login")}>
                                     You already have an Account?
