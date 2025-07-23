@@ -5,36 +5,18 @@ import axiosInstance from "../config/axios.config";
 
 const UserLayout = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [data, setData] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
     const navigate = useNavigate();
-
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
 
-        const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
-
-        if (user && user.id) {
-            const fetchUserData = async () => {
-                try {
-                    const response = await axiosInstance.get(`users/${user.id}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    setData(response);
-                    console.log("Fetched user data:", response);
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                }
-            };
-
-            fetchUserData();
+        if (user?.profileImage) {
+            setSelectedImage(user.profileImage);
         }
     }, []);
-
 
     const handleLogout = () => {
         Swal.fire({
@@ -47,15 +29,37 @@ const UserLayout = () => {
             if (result.isConfirmed) {
                 localStorage.clear();
                 setIsLoggedIn(false);
-                Swal.fire({
-                    title: "Logged Out",
-                    icon: "success",
-                });
+                Swal.fire("Logged Out", "", "success");
                 navigate("/login");
-            } else if (result.isDenied) {
+            } else {
                 Swal.fire("Logout Cancelled", "", "info");
             }
         });
+    };
+
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("profileImage", file);
+
+        try {
+            const token = localStorage.getItem("accessToken");
+            const response = await axiosInstance.post(
+                `/users/${user.id}/upload-photo`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setSelectedImage(response.data.imageUrl);
+        } catch (error) {
+            console.error("Image upload failed:", error);
+        }
     };
 
     return (
@@ -70,10 +74,43 @@ const UserLayout = () => {
                         <div className="flex flex-col items-center relative">
                             <div className="relative mb-2">
                                 <img
-                                    className="w-20 h-20 rounded-full"
-                                    src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                                    className="w-20 h-20 rounded-full object-cover"
+                                    src={
+                                        selectedImage ||
+                                        "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                                    }
                                     alt="user"
                                 />
+                                {isLoggedIn && (
+                                    <>
+                                        <label
+                                            htmlFor="imageUpload"
+                                            className="absolute bottom-0 right-0 bg-white rounded-full p-1 cursor-pointer shadow"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                strokeWidth={1.5}
+                                                stroke="currentColor"
+                                                className="w-4 h-4 text-gray-600"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M16.862 4.487a2.121 2.121 0 0 1 3 3L7.5 19.5H4.5v-3L16.862 4.487z"
+                                                />
+                                            </svg>
+                                        </label>
+                                        <input
+                                            type="file"
+                                            id="imageUpload"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleImageChange}
+                                        />
+                                    </>
+                                )}
                             </div>
                             <p className="text-xs font-medium text-gray-900">
                                 {user?.f_name || "User Name"}
@@ -93,7 +130,6 @@ const UserLayout = () => {
 
                     <ul className="mt-5 space-y-2 font-medium">
                         <span className="ms-3 text-xs font-medium">Menu</span>
-
                         <li>
                             <NavLink to="/user/profile" className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,28 +196,31 @@ const UserLayout = () => {
 
                             </NavLink>
                         </li>
-
-                        {!isLoggedIn ? (
-                            <li>
-                                <NavLink to="/login" className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9a.75.75 0 1 0 1.5 0V5.25a1.5 1.5 0 0 1 1.5-1.5h6Z" />
-                                        <path d="M11.47 8.47a.75.75 0 0 0 0 1.06l1.72 1.72H2.25a.75.75 0 0 0 0 1.5h10.94l-1.72 1.72a.75.75 0 0 0 1.06 1.06l3-3a.75.75 0 0 0 0-1.06l-3-3a.75.75 0 0 0-1.06 0Z" />
-                                    </svg>
-                                    <span className="ms-3 text-xs">Login</span>
-                                </NavLink>
-                            </li>
-                        ) : (
+                       {isLoggedIn ? (
                             <li>
                                 <button
                                     onClick={handleLogout}
                                     className="flex items-center w-full p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
                                 >
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
                                         <path d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6A2.25 2.25 0 0 0 15.75 18.75V15m3 0 3-3m0 0-3-3m3 3H9" />
                                     </svg>
                                     <span className="ms-3 text-xs">Logout</span>
                                 </button>
+                            </li>
+                        ) : (
+                            <li>
+                                <NavLink
+                                    to="/login"
+                                    className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
+                                >
+                                    <span className="ms-3 text-xs">Login</span>
+                                </NavLink>
                             </li>
                         )}
                     </ul>
@@ -198,3 +237,4 @@ const UserLayout = () => {
 };
 
 export default UserLayout;
+
