@@ -8,15 +8,18 @@ const UserLayout = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    console.log("the logged in user is :", user)
+    console.log("the selected image is:", selectedImage);
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
 
-        if (user?.profileImage) {
-            setSelectedImage(user.profileImage);
+        if (user?.image_url) {
+            setSelectedImage(user.image_url);
         }
     }, []);
+
 
     const handleLogout = () => {
         Swal.fire({
@@ -42,12 +45,12 @@ const UserLayout = () => {
         if (!file) return;
 
         const formData = new FormData();
-        formData.append("profileImage", file);
+        formData.append("image", file);
+        formData.append("userId", user.id)
 
         try {
             const token = localStorage.getItem("accessToken");
-            const response = await axiosInstance.post(
-                `/users/${user.id}/upload-photo`,
+            const response = await axiosInstance.post("/users/upload",
                 formData,
                 {
                     headers: {
@@ -56,6 +59,7 @@ const UserLayout = () => {
                     },
                 }
             );
+            console.log("the front end response is:", response)
             setSelectedImage(response.data.imageUrl);
         } catch (error) {
             console.error("Image upload failed:", error);
@@ -196,7 +200,7 @@ const UserLayout = () => {
 
                             </NavLink>
                         </li>
-                       {isLoggedIn ? (
+                        {isLoggedIn ? (
                             <li>
                                 <button
                                     onClick={handleLogout}
