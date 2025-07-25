@@ -11,6 +11,7 @@ const SendEmail = () => {
   const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
   const [fromDate, setFromDate] = useState();
   const [toDate, setToDate] = useState();
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -37,6 +38,26 @@ const SendEmail = () => {
 
     fetchGroups();
   }, []);
+
+  useEffect(() => {
+    const fetchUserSubscription = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await axiosInstance.get("/userSubscription/subscriptionByUser", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setData(res.subscriptions || []);
+      } catch (err) {
+        console.error("Failed to load subscription info", err);
+      }
+
+    }
+    fetchUserSubscription();
+  }, [])
+  const totalRemainingMessages = data.flat().reduce((acc, sub) => {
+    const total = (sub.numberOfMsgs || 0) - (sub.msgsSent || 0);
+    return acc + total;
+  }, 0);
 
   const handleEmailInputChange = (e) => {
     setEmailInput(e.target.value);
@@ -203,9 +224,15 @@ const SendEmail = () => {
         </div>
         <button
           onClick={handleSubmit}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"
+          disabled={totalRemainingMessages <= 0}
+          className={`font-bold p-3 rounded w-full ${totalRemainingMessages <= 0
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-green-500 hover:bg-green-600 text-white"
+            }`}
         >
-          Send Email
+          {totalRemainingMessages <= 0
+            ? "No Remaining Messages"
+            : "Send Message"}
         </button>
       </div>
       <div className="w-full md:w-[30%] bg-white border rounded shadow-md flex flex-col">

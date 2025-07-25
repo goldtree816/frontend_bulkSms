@@ -9,26 +9,41 @@ const SendWhatsAppMsg = () => {
     const [groups, setGroups] = useState([]);
     const [checkedGroups, setCheckedGroups] = useState(new Set());
     const [expandedGroupIndex, setExpandedGroupIndex] = useState(null);
-    const [fromDate, setFromDate] = useState();
-    const [toDate, setToDate] = useState();
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [data, setData] = useState([]);
+
+    const isValidNumber = (num) => /^\+?\d{6,}$/.test(num);
+
+    useEffect(() => {
+        const fetchUserSubscription = async () => {
+            try {
+                const token = localStorage.getItem("accessToken");
+                const res = await axiosInstance.get("/userSubscription/subscriptionByUser", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setData(res.subscriptions || []);
+            } catch (err) {
+                console.error("Failed to load subscription info", err);
+            }
+        };
+
+        fetchUserSubscription();
+    }, []);
 
     useEffect(() => {
         const fetchGroups = async () => {
             try {
                 const res = await axiosInstance.get("/groups/getGroups");
-
                 const formattedGroups = res.groups
                     .map((group) => ({
                         ...group,
-                        contactList:
-                            typeof group.contactList === "string"
-                                ? JSON.parse(group.contactList)
-                                : group.contactList,
+                        contactList: typeof group.contactList === "string"
+                            ? JSON.parse(group.contactList)
+                            : group.contactList,
                     }))
                     .filter((group) => group.groupType === "WhatsApp Group");
-
                 setGroups(formattedGroups);
-                console.log("the groups are:", formattedGroups);
             } catch (err) {
                 console.error("Failed to load WhatsApp groups", err);
             }
@@ -37,9 +52,13 @@ const SendWhatsAppMsg = () => {
         fetchGroups();
     }, []);
 
-    const handleNumberInputChange = (e) => {
-        setNumberInput(e.target.value);
-    };
+    const totalRemainingMessages = data.flat().reduce((acc, sub) => {
+        const total = (sub.numberOfMsgs || 0) - (sub.msgsSent || 0);
+        return acc + total;
+    }, 0);
+
+
+    const handleNumberInputChange = (e) => setNumberInput(e.target.value);
 
     const handleNumberInputKeyPress = (e) => {
         if (e.key === "Enter" || e.key === ",") {
@@ -47,7 +66,7 @@ const SendWhatsAppMsg = () => {
             const enteredNumbers = numberInput
                 .split(/[,\s]+/)
                 .map((num) => num.trim())
-                .filter((num) => num && !numbers.includes(num));
+                .filter((num) => isValidNumber(num) && !numbers.includes(num));
             setNumbers((prev) => [...prev, ...enteredNumbers]);
             setNumberInput("");
         }
@@ -61,14 +80,13 @@ const SendWhatsAppMsg = () => {
         reader.onload = (evt) => {
             const data = evt.target.result;
             const workbook = XLSX.read(data, { type: "binary" });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
             const extractedNumbers = jsonData
                 .flat()
                 .map((item) => String(item).trim())
-                .filter((num) => num.match(/^\+?\d{6,}$/));
+                .filter((num) => isValidNumber(num));
 
             setNumbers((prev) => [...new Set([...prev, ...extractedNumbers])]);
         };
@@ -80,12 +98,14 @@ const SendWhatsAppMsg = () => {
         const group = groups[index];
 
         const groupNumbers = group.contactList
-            .map((contact) => {
-                if (typeof contact === "object" && contact?.number) return contact.number.trim();
-                if (typeof contact === "string") return contact.trim();
-                return null;
-            })
-            .filter((num) => num && /^\+?\d{6,}$/.test(num));
+            .map((contact) =>
+                typeof contact === "object" && contact?.number
+                    ? contact.number.trim()
+                    : typeof contact === "string"
+                        ? contact.trim()
+                        : null
+            )
+            .filter((num) => isValidNumber(num));
 
         if (updatedSet.has(index)) {
             updatedSet.delete(index);
@@ -117,7 +137,7 @@ const SendWhatsAppMsg = () => {
             setCheckedGroups(new Set());
         } catch (err) {
             console.error("Error sending messages:", err);
-            alert("Failed to send WhatsApp messages.");
+            alert(err?.response?.data?.message || "Failed to send WhatsApp messages.");
         }
     };
 
@@ -151,6 +171,7 @@ const SendWhatsAppMsg = () => {
                     onChange={handleFileUpload}
                     className="w-full mb-4 border border-gray-300 rounded"
                 />
+
                 <div className="mb-4">
                     <label className="font-semibold mb-1">Numbers</label>
                     <div className="border border-gray-300 w-full rounded p-2 bg-gray-50 max-h-40 overflow-y-auto text-sm space-y-2">
@@ -175,22 +196,17 @@ const SendWhatsAppMsg = () => {
                         )}
                     </div>
                 </div>
+
                 <div className="flex flex-wrap gap-2 ml-15 w-auto">
                     <div className="px-2 py-1 space-x-4">
-                        <label htmlFor="" className="font-medium">From</label>
-                        <input type="date"
-                            value={fromDate}
-                            onChange={(e) => setFromDate(e.target.value)} />
+                        <label className="font-medium">From</label>
+                        <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
                     </div>
                     <div className="px-2 py-1 space-x-4">
-                        <label htmlFor="" className="font-medium">To</label>
-                        <input type="date"
-                            value={toDate}
-                            onChange={(e) => setToDate(e.target.value)} />
+                        <label className="font-medium">To</label>
+                        <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
                     </div>
-
                 </div>
-
 
                 <label className="font-semibold">Message</label>
                 <textarea
@@ -203,9 +219,15 @@ const SendWhatsAppMsg = () => {
 
                 <button
                     onClick={handleSubmit}
-                    className="font-bold bg-green-500 hover:bg-green-600 text-white p-3 rounded w-full"
+                    disabled={totalRemainingMessages <= 0}
+                    className={`font-bold p-3 rounded w-full ${totalRemainingMessages <= 0
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-green-500 hover:bg-green-600 text-white"
+                        }`}
                 >
-                    Send Message
+                    {totalRemainingMessages <= 0
+                        ? "No Remaining Messages"
+                        : "Send Message"}
                 </button>
             </div>
 
