@@ -97,29 +97,73 @@ const SendEmail = () => {
     reader.readAsBinaryString(file);
   };
 
+  // const handleSubmit = async () => {
+  //   if (!emails.length || !message.trim()) {
+  //     alert("Please enter at least one email and a message.");
+  //     return;
+  //   }
+
+  //   try {
+  //     await axiosInstance.post("/numbers/email", {
+  //       emails,
+  //       message,
+  //     });
+
+  //     alert("Emails sent successfully!");
+  //     setEmails([]);
+  //     setMessage("");
+  //     setEmailInput("");
+  //     setCheckedGroups(new Set());
+  //   } catch (err) {
+  //     console.error("Error sending emails:", err);
+  //     alert("Failed to send emails.");
+  //   }
+  // };
+
+
   const handleSubmit = async () => {
-    if (!emails.length || !message.trim()) {
-      alert("Please enter at least one email and a message.");
+    if (!numbers.length || !message.trim()) {
+      alert("Please enter at least one number and a message.");
       return;
     }
 
     try {
-      await axiosInstance.post("/numbers/email", {
-        emails,
+      await axiosInstance.post("/numbers/whatsAppMessage", {
+        numbers,
         message,
       });
 
-      alert("Emails sent successfully!");
-      setEmails([]);
+      alert("WhatsApp messages sent successfully!");
+
+      const messagesToSend = numbers.length;
+      let msgsLeft = messagesToSend;
+      for (const sub of data.flat()) {
+        const remaining = (sub.numberOfMsgs || 0) - (sub.msgsSent || 0);
+        if (remaining <= 0 || msgsLeft <= 0) continue;
+
+        const toSend = Math.min(remaining, msgsLeft);
+        const updatedMsgsSent = (sub.msgsSent || 0) + toSend;
+
+        await axiosInstance.patch(`/userSubscription/${sub.id}/editSunscription`, {
+          msgsSent: updatedMsgsSent,
+        });
+
+        msgsLeft -= toSend;
+      }
+      const token = localStorage.getItem("accessToken");
+      const res = await axiosInstance.get("/userSubscription/subscriptionByUser", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setData(res.subscriptions || []);
+      setNumbers([]);
       setMessage("");
-      setEmailInput("");
+      setNumberInput("");
       setCheckedGroups(new Set());
     } catch (err) {
-      console.error("Error sending emails:", err);
-      alert("Failed to send emails.");
+      console.error("Error sending messages:", err);
+      alert(err?.response?.data?.message || "Failed to send WhatsApp messages.");
     }
   };
-
   const toggleGroupCheck = (index) => {
     const updatedSet = new Set(checkedGroups);
     const group = groups[index];

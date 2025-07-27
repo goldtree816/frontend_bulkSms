@@ -131,6 +131,27 @@ const SendWhatsAppMsg = () => {
             });
 
             alert("WhatsApp messages sent successfully!");
+
+            const messagesToSend = numbers.length;
+            let msgsLeft = messagesToSend;
+            for (const sub of data.flat()) {
+                const remaining = (sub.numberOfMsgs || 0) - (sub.msgsSent || 0);
+                if (remaining <= 0 || msgsLeft <= 0) continue;
+
+                const toSend = Math.min(remaining, msgsLeft);
+                const updatedMsgsSent = (sub.msgsSent || 0) + toSend;
+
+                await axiosInstance.patch(`/userSubscription/${sub.id}/editSunscription`, {
+                    msgsSent: updatedMsgsSent,
+                });
+
+                msgsLeft -= toSend;
+            }
+            const token = localStorage.getItem("accessToken");
+            const res = await axiosInstance.get("/userSubscription/subscriptionByUser", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setData(res.subscriptions || []);
             setNumbers([]);
             setMessage("");
             setNumberInput("");
@@ -221,8 +242,8 @@ const SendWhatsAppMsg = () => {
                     onClick={handleSubmit}
                     disabled={totalRemainingMessages <= 0}
                     className={`font-bold p-3 rounded w-full ${totalRemainingMessages <= 0
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-500 hover:bg-green-600 text-white"
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-500 hover:bg-green-600 text-white"
                         }`}
                 >
                     {totalRemainingMessages <= 0
