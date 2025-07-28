@@ -33,7 +33,7 @@ const RoutingConfig = () => {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/user" element={<UserLayout />}>
           <Route path="profile" element={<UserReport />} />
-          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="dashboard" element={<UserDashbo
           <Route path="contacts" element={
             token ? (<ManageContacts />) : (<Navigate to="/login" />)} />
           <Route path="whatsApp" element={token ? (<SendWhatsAppMsg />) : (<Navigate to="/login" />)} />

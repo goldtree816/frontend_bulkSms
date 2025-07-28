@@ -6,7 +6,7 @@ import axiosInstance from "../../config/axios.config";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
-import { FaEyeSlash, FaEye } from "react-icons/fa"
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -19,20 +19,25 @@ const RegisterPage = () => {
         email: Yup.string().email("Invalid email").required("Email is required"),
         password: Yup.string()
             .min(8, "Password must be at least 8 characters")
-            .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/, "Password must be strong")
+            .matches(
+                /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/,
+                "Password must be strong"
+            )
             .required("Password is required"),
         confirmPassword: Yup.string()
             .oneOf([Yup.ref("password")], "Confirm password and password do not match")
             .required("Confirm Password is required"),
     });
-    const togglePassword = () => {
-        setShowPassword(!showPassword);
-    }
     const toggleConfirmPassword = () => {
         setShowConfirmPassword(!showConfirmPaword);
-    }
-    const { register, handleSubmit, formState: { errors } } = useForm({
-        resolver: yupResolver(rules)
+    };
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        resolver: yupResolver(rules),
     });
 
     const submitEvent = async (data) => {
@@ -41,10 +46,9 @@ const RegisterPage = () => {
             console.log("Response:", response);
 
             toast.success("Registration Successful!");
-
             setTimeout(() => {
                 navigate("/login");
-            }, 1500);
+            }, 2000);
 
         } catch (exception) {
             console.log("Register Exception:", exception.response?.data || exception.message);
@@ -57,23 +61,38 @@ const RegisterPage = () => {
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
 
             <div className="bg-gradient-to-r from-indigo-400 via-blue-400 to-green-400 h-[100vh] flex items-center justify-center">
-                <div className="bg-white h-auto w-[50%] rounded-xl">
-                    <h1 className="text-blue-500 text-center text-2xl font-bold">Register Page</h1>
+                <div className="bg-white h-auto w-[50%] rounded-xl p-6">
+                    <h1 className="text-blue-500 text-center text-2xl font-bold mb-6">Register Page</h1>
                     <form onSubmit={handleSubmit(submitEvent)}>
-                        <div className="flex w-full items-center justify-center mt-2 mb-6">
+                        <div className="flex w-full items-center justify-center">
                             <div className="flex w-[80%] flex-col space-y-4">
 
                                 <label>First Name</label>
-                                <input {...register("f_name")} type="text" className="border-b-2 focus:outline-none" placeholder="Enter your name here" />
-                                <p className="text-red-500">{errors?.f_name?.message}</p>
+                                <input
+                                    {...register("f_name")}
+                                    type="text"
+                                    className="border-b-2 focus:outline-none"
+                                    placeholder="Enter your name here"
+                                />
+                                <p className="text-red-500 text-sm">{errors?.f_name?.message}</p>
 
                                 <label>Last Name</label>
-                                <input {...register("l_name")} type="text" className="border-b-2 focus:outline-none" placeholder="Enter your username" />
-                                <p className="text-red-500">{errors?.l_name?.message}</p>
+                                <input
+                                    {...register("l_name")}
+                                    type="text"
+                                    className="border-b-2 focus:outline-none"
+                                    placeholder="Enter your username"
+                                />
+                                <p className="text-red-500 text-sm">{errors?.l_name?.message}</p>
 
                                 <label>Email</label>
-                                <input {...register("email")} type="text" className="border-b-2 focus:outline-none" placeholder="Enter your @email" />
-                                <p className="text-red-500">{errors?.email?.message}</p>
+                                <input
+                                    {...register("email")}
+                                    type="text"
+                                    className="border-b-2 focus:outline-none"
+                                    placeholder="Enter your @email"
+                                />
+                                <p className="text-red-500 text-sm">{errors?.email?.message}</p>
 
                                 <div className="flex flex-col">
                                     <label className="mb-1">Password</label>
@@ -90,6 +109,7 @@ const RegisterPage = () => {
                                     </div>
                                     <p className="text-red-500 text-sm mt-1">{errors?.password?.message}</p>
                                 </div>
+
                                 <div className="flex flex-col">
                                     <label htmlFor="confirmPassword">Confirm Password</label>
                                     <div className="flex items-center border-b-2">
@@ -106,14 +126,20 @@ const RegisterPage = () => {
                                     <p className="text-red-500 text-sm mt-1">{errors?.confirmPassword?.message}</p>
                                 </div>
 
-                                <button type="button" className="text-blue-500" onClick={() => navigate("/login")}>
-                                    You already have an Account?
+                                <button
+                                    type="button"
+                                    className="text-blue-500 underline text-sm"
+                                    onClick={() => navigate("/login")}
+                                >
+                                    Already have an account?
                                 </button>
 
-                                <button type="submit" className="border-2 rounded-full bg-green-500 hover:bg-blue-500 h-10 text-white transition-colors duration-300">
+                                <button
+                                    type="submit"
+                                    className="border-2 rounded-full bg-green-500 hover:bg-blue-500 h-10 text-white transition-colors duration-300"
+                                >
                                     Sign Up
                                 </button>
-
                             </div>
                         </div>
                     </form>
