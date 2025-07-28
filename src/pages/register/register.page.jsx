@@ -28,11 +28,6 @@ const RegisterPage = () => {
             .oneOf([Yup.ref("password")], "Confirm password and password do not match")
             .required("Confirm Password is required"),
     });
-
-    const togglePassword = () => {
-        setShowPassword(!showPassword);
-    };
-
     const toggleConfirmPassword = () => {
         setShowConfirmPassword(!showConfirmPaword);
     };
