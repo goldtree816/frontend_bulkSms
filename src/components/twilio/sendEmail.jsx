@@ -229,7 +229,7 @@ const SendEmail = () => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Parsed Emails
+            Emails
           </label>
           <textarea
             rows={4}
@@ -259,7 +259,7 @@ const SendEmail = () => {
             Message
           </label>
           <textarea
-            rows={15}
+            rows={4}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -271,7 +271,7 @@ const SendEmail = () => {
           disabled={totalRemainingMessages <= 0}
           className={`font-bold p-3 rounded w-full ${totalRemainingMessages <= 0
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-500 hover:bg-green-600 text-white"
+            : "bg-gray-500 hover:bg-gray-600 text-white"
             }`}
         >
           {totalRemainingMessages <= 0

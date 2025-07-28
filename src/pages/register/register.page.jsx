@@ -25,10 +25,10 @@ const RegisterPage = () => {
             .oneOf([Yup.ref("password")], "Confirm password and password do not match")
             .required("Confirm Password is required"),
     });
-    const togglePassword=()=>{
+    const togglePassword = () => {
         setShowPassword(!showPassword);
     }
-    const toggleConfirmPassword=()=>{
+    const toggleConfirmPassword = () => {
         setShowConfirmPassword(!showConfirmPaword);
     }
     const { register, handleSubmit, formState: { errors } } = useForm({
@@ -93,16 +93,17 @@ const RegisterPage = () => {
                                 <div className="flex flex-col">
                                     <label htmlFor="confirmPassword">Confirm Password</label>
                                     <div className="flex items-center border-b-2">
-                                        <input type={showConfirmPaword? "text":"password"} 
-                                        className="flex-1 focus:outline-none"
-                                        placeholder="Enter you password again"/>
-
-                                        <span onClick={toggleConfirmPassword}>
-                                            {showConfirmPaword ? <FaEyeSlash/>:<FaEye/>}
+                                        <input
+                                            {...register("confirmPassword")}
+                                            type={showConfirmPaword ? "text" : "password"}
+                                            className="flex-1 focus:outline-none"
+                                            placeholder="Enter your password again"
+                                        />
+                                        <span onClick={toggleConfirmPassword} className="cursor-pointer text-gray-600 px-2">
+                                            {showConfirmPaword ? <FaEyeSlash /> : <FaEye />}
                                         </span>
-
                                     </div>
-
+                                    <p className="text-red-500 text-sm mt-1">{errors?.confirmPassword?.message}</p>
                                 </div>
 
                                 <button type="button" className="text-blue-500" onClick={() => navigate("/login")}>

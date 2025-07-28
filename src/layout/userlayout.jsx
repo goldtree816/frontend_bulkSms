@@ -3,6 +3,10 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import axiosInstance from "../config/axios.config";
 
+
+const imageBaseUrl = import.meta.env.VITE_IMAGE_URL;
+
+
 const UserLayout = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -15,12 +19,29 @@ const UserLayout = () => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
 
-        if (user?.image_url) {
-            setSelectedImage(user.image_url);
-        }
+        const fetchUser = async () => {
+            try {
+                if (user?.id) {
+                    const response = await axiosInstance.get(`/users/${user.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    console.log("the user response is :", response)
+
+                    const updatedUser = response.user;
+                    console.log("the updated user is:", updatedUser)
+                    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+                    setSelectedImage(updatedUser.image_url);
+                }
+            } catch (error) {
+                console.error("Failed to fetch user image:", error);
+            }
+        };
+
+        fetchUser();
     }, []);
-
-
     const handleLogout = () => {
         Swal.fire({
             title: "Are you sure you want to Log Out?",
@@ -68,6 +89,25 @@ const UserLayout = () => {
 
     return (
         <>
+            <div className="sm:hidden p-4">
+                <button
+                    onClick={() =>
+                        document.getElementById("logo-sidebar").classList.toggle("-translate-x-full")
+                    }
+                    className="text-gray-800"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+
             <aside
                 id="logo-sidebar"
                 className="fixed top-0 left-0 z-40 w-50 h-screen transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0"
@@ -80,11 +120,14 @@ const UserLayout = () => {
                                 <img
                                     className="w-20 h-20 rounded-full object-cover"
                                     src={
-                                        selectedImage ||
-                                        "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                                        selectedImage
+                                            ? `${imageBaseUrl}/uploads/${selectedImage}`
+                                            : "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
                                     }
+                                    // crossOrigin="anonymous"
                                     alt="user"
                                 />
+
                                 {isLoggedIn && (
                                     <>
                                         <label
@@ -192,8 +235,8 @@ const UserLayout = () => {
                         </li>
                         <li>
                             <NavLink to="/user/service" className="flex itmes-center p-2 text-gray-900 rounded-lg hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
                                 </svg>
 
                                 <span className="ms-3 text-xs">Services</span>

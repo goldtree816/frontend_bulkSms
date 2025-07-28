@@ -22,6 +22,7 @@ import BuyService from '../layout/buyservice';
 const RoutingConfig = () => {
 
   const token = localStorage.getItem("accessToken");
+  console.log("the token is this:", token)
 
   return (
     <>
@@ -33,26 +34,27 @@ const RoutingConfig = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route path="profile" element={<UserReport />} />
           <Route path="dashboard" element={<UserDashboard />} />
-          <Route path="contacts" element={<ManageContacts />} />
-          <Route path="whatsApp" element={<SendWhatsAppMsg/>}/>
-          <Route path="email" element={<SendEmail/>}/>
-          <Route path="service" element={<Service/>}/>
-          <Route path="buyService" element={<BuyService/>}/>
+          <Route path="contacts" element={
+            token ? (<ManageContacts />) : (<Navigate to="/login" />)} />
+          <Route path="whatsApp" element={token ? (<SendWhatsAppMsg />) : (<Navigate to="/login" />)} />
+          <Route path="email" element={token ? (<SendEmail />) : (<Navigate to="/login" />)} />
+          <Route path="service" element={token ? (<Service />) : (<Navigate to="/login" />)} />
+          <Route path="buyService" element={<BuyService />} />
           <Route
             path="calendar"
             element={
               token ? (
                 <MyCalendar />
               ) : (
-                <Navigate to="/login"/>
+                <Navigate to="/login" />
               )
             }
           />
 
           <Route path="editProfile" element={<EditProfile />} />
           <Route path="bycountry" element={<FilterByCountry />} />
-          <Route path="createGroup" element={<CreateGroup/>}/>
-          <Route path="editGroup/:id" element={<EditGroup/>}/>
+          <Route path="createGroup" element={<CreateGroup />} />
+          <Route path="editGroup/:id" element={<EditGroup />} />
         </Route>
 
         <Route path="/login" element={<LoginPage />} />
